@@ -1,4 +1,4 @@
-#include "DistortionKnob.h"
+#include "Delay.h"
 #include "IPlug_include_in_plug_src.h"
 #include "IControl.h"
 #include "resource.h"
@@ -20,7 +20,7 @@ enum ELayout
   kKnobFrames = 128
 };
 
-DistortionKnob::DistortionKnob(IPlugInstanceInfo instanceInfo)
+Delay::Delay(IPlugInstanceInfo instanceInfo)
   :	IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo), mThreshold(1.)
 {
   TRACE;
@@ -41,9 +41,9 @@ DistortionKnob::DistortionKnob(IPlugInstanceInfo instanceInfo)
   CreatePresets();
 }
 
-DistortionKnob::~DistortionKnob() {}
+Delay::~Delay() {}
 
-void DistortionKnob::ProcessDoubleReplacing(double** inputs, double** outputs, int nFrames)
+void Delay::ProcessDoubleReplacing(double** inputs, double** outputs, int nFrames)
 {
   // Mutex is already locked for us.
 
@@ -64,13 +64,13 @@ void DistortionKnob::ProcessDoubleReplacing(double** inputs, double** outputs, i
   }
 }
 
-void DistortionKnob::Reset()
+void Delay::Reset()
 {
   TRACE;
   IMutexLock lock(this);
 }
 
-void DistortionKnob::OnParamChange(int paramIdx)
+void Delay::OnParamChange(int paramIdx)
 {
   IMutexLock lock(this);
 
@@ -85,8 +85,8 @@ void DistortionKnob::OnParamChange(int paramIdx)
   }
 }
 
-void DistortionKnob::CreatePresets() {
+void Delay::CreatePresets() {
 	MakePreset("Clean", 0.0);
 	MakePreset("Subtle", 20.0);
-	MakePreset("Extreme", 99.9);
+	MakePreset("Extreme", 100);
 }
