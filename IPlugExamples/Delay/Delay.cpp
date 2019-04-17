@@ -56,7 +56,7 @@ void Delay::ProcessDoubleReplacing(double** inputs, double** outputs, int nFrame
 	  for (int s = 0; s < nFrames; ++s, ++input, ++output) {
 		  // Writing data to left and right channel buffers for delay effect
 		  
-		  if (i == 0) {
+		  if (i == 0 ) {
 			  if (ptrL > 32767) {
 				  ptrL = 0;
 				  firstIteration = false;
@@ -75,8 +75,9 @@ void Delay::ProcessDoubleReplacing(double** inputs, double** outputs, int nFrame
 			  else {
 				  *output = *input;
 			  }
+			  ptrL++;
 		  } else {
-			  /**
+			  
 			  if (ptrR > 32767) {
 				  ptrR = 0;
 				  firstIteration = false;
@@ -94,7 +95,8 @@ void Delay::ProcessDoubleReplacing(double** inputs, double** outputs, int nFrame
 			  else {
 				  *output = *input;
 			  }
-			  */
+			  ptrR++;
+			  
 		  }
 		  
 
@@ -109,8 +111,8 @@ void Delay::ProcessDoubleReplacing(double** inputs, double** outputs, int nFrame
 		  *output /= mFeedback;
 		  */
 
-		  ptrL++;
-		  ptrR++;
+		  
+		  
 		  //*output = *input;
 	  }
 
