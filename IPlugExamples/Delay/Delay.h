@@ -12,10 +12,10 @@ public:
   void Reset();
   void OnParamChange(int paramIdx);
   void ProcessDoubleReplacing(double** inputs, double** outputs, int nFrames);
-  int DelayPtrCalculation(int * ptr);
+  int DelayPtrCalc(int * ptr);
 
 private:
-  double mFeedback;
+  double mWetLevel;
   //int mSampleRate; // How to access if changed from 44.1kHz? 
   // -> Unnecessary, GetSampleRate() is inherited from IPlugBase
   int ptrL;

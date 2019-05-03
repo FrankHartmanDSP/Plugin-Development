@@ -7,7 +7,7 @@ const int kNumPrograms = 3;
 
 enum EParams
 {
-  kFeedback = 0,
+  kWetLevel = 0,
   kNumParams
 };
 
@@ -15,26 +15,26 @@ enum ELayout
 {
   kWidth = GUI_WIDTH,
   kHeight = GUI_HEIGHT,
-  kFeedbackX = 79,
-  kFeedbackY = 62,
+  kWetLevelX = 79,
+  kWetLevelY = 62,
   kKnobFrames = 128
 };
 
 Delay::Delay(IPlugInstanceInfo instanceInfo)
-  :	IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo), mFeedback(1.), ptrL(0), ptrR(0), firstIteration(true)
+  :	IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo), mWetLevel(1.), ptrL(0), ptrR(0), firstIteration(true)
 {
   TRACE;
 
   //arguments are: name, defaultVal, minVal, maxVal, step, label
-  GetParam(kFeedback)->InitDouble("Feedback", 50.0, 0.0, 100.0, 0.01, "%");
-  GetParam(kFeedback)->SetShape(0.1);
+  GetParam(kWetLevel)->InitDouble("WetLevel", 50.0, 0.0, 100.0, 0.01, "%");
+  GetParam(kWetLevel)->SetShape(0.1);
 
   IGraphics* pGraphics = MakeGraphics(this, kWidth, kHeight);
   pGraphics->AttachBackground(BACKGROUND_ID, BACKGROUND_FN);
 
   IBitmap knob = pGraphics->LoadIBitmap(KNOB_ID, KNOB_FN, kKnobFrames);
 
-  pGraphics->AttachControl(new IKnobMultiControl(this, kFeedbackX, kFeedbackY, kFeedback, &knob));
+  pGraphics->AttachControl(new IKnobMultiControl(this, kWetLevelX, kWetLevelY, kWetLevel, &knob));
 
   AttachGraphics(pGraphics);
 
@@ -45,7 +45,7 @@ Delay::~Delay() {}
 
 void Delay::ProcessDoubleReplacing(double** inputs, double** outputs, int nFrames)
 {
-  // Mutex is already locked for us.
+  // Mutex is already locked.
 
   int const channelCount = 2;
 
@@ -63,17 +63,16 @@ void Delay::ProcessDoubleReplacing(double** inputs, double** outputs, int nFrame
 			  mBufferL[ptrL] = *input;
 			  // Delay effect
 			  if (!firstIteration) {
-				  if (mBufferL[DelayPtrCalculation(&ptrL)]) {
-					  *output = *input + (mFeedback * mBufferL[DelayPtrCalculation(&ptrL)]);
-				  }
-				  else {
+				  if (mBufferL[DelayPtrCalc(&ptrL)]) {
+					  *output = *input + (mWetLevel * mBufferL[DelayPtrCalc(&ptrL)]);
+				  } else {
 					  *output = *input;
 				  }
-			  }
-			  else {
+			  } else {
+				  // Do not create delay effect if no data exists in the buffer
 				  *output = *input;
 			  }
-			  ptrL++;
+			  ++ptrL;
 		  } else {
 			  if (ptrR > 32767) {
 				  ptrR = 0;
@@ -81,10 +80,9 @@ void Delay::ProcessDoubleReplacing(double** inputs, double** outputs, int nFrame
 			  }
 			  mBufferR[ptrR] = *input;
 			  if (!firstIteration) {
-				  if (mBufferR[DelayPtrCalculation(&ptrR)]) {
-					  *output = *input + (mFeedback * mBufferR[DelayPtrCalculation(&ptrR)]);
-				  }
-				  else {
+				  if (mBufferR[DelayPtrCalc(&ptrR)]) {
+					  *output = *input + (mWetLevel * mBufferR[DelayPtrCalc(&ptrR)]);
+				  } else {
 					  *output = *input;
 				  }
 			  }
@@ -109,8 +107,8 @@ void Delay::OnParamChange(int paramIdx)
 
   switch (paramIdx)
   {
-    case kFeedback:
-      mFeedback = (GetParam(kFeedback)->Value() / 100.);
+    case kWetLevel:
+      mWetLevel = (GetParam(kWetLevel)->Value() / 100.);
       break;
 
     default:
@@ -124,7 +122,7 @@ void Delay::CreatePresets() {
 	MakePreset("Extreme", 99.9);
 }
 
-int Delay::DelayPtrCalculation(int * ptr) {
+int Delay::DelayPtrCalc(int * ptr) {
 	if ((*ptr - 16384) < 0) {
 		return (32768 + (*ptr - 16384));
 	} else {
