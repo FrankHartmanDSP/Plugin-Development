@@ -22,6 +22,7 @@ private:
   int ptrR;
   double mBufferL[32768]; // 2^15 is 32768
   double mBufferR[32768]; // 2^15
+  int mBufferSize;
   void CreatePresets();
   bool firstIteration; // Replace with logic
 

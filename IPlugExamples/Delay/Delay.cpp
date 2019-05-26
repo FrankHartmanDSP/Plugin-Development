@@ -21,7 +21,8 @@ enum ELayout
 };
 
 Delay::Delay(IPlugInstanceInfo instanceInfo)
-  :	IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo), mWetLevel(1.), ptrL(0), ptrR(0), firstIteration(true)
+  :	IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo), mWetLevel(1.), ptrL(0), ptrR(0),
+	mBufferSize(32767), firstIteration(true)
 {
   TRACE;
 
@@ -56,7 +57,7 @@ void Delay::ProcessDoubleReplacing(double** inputs, double** outputs, int nFrame
 	  for (int s = 0; s < nFrames; ++s, ++input, ++output) {
 		  // Writing data to left and right channel buffers for delay effect
 		  if (i == 0) {
-			  if (ptrL > 32767) {
+			  if (ptrL > mBufferSize) {
 				  ptrL = 0;
 				  firstIteration = false;
 			  }
@@ -74,7 +75,7 @@ void Delay::ProcessDoubleReplacing(double** inputs, double** outputs, int nFrame
 			  }
 			  ++ptrL;
 		  } else {
-			  if (ptrR > 32767) {
+			  if (ptrR > mBufferSize) {
 				  ptrR = 0;
 				  firstIteration = false;
 			  }
