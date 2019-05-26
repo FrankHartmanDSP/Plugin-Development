@@ -21,8 +21,8 @@ enum ELayout
 };
 
 Delay::Delay(IPlugInstanceInfo instanceInfo)
-  :	IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo), mWetLevel(1.), ptrL(0), ptrR(0),
-	mBufferSize(32767), firstIteration(true)
+  :	IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo), mWetLevel(1.), mPtr(0),
+	mBufferSize(32768), firstIteration(true)
 {
   TRACE;
 
@@ -51,47 +51,25 @@ void Delay::ProcessDoubleReplacing(double** inputs, double** outputs, int nFrame
   int const channelCount = 2;
 
   for (int i = 0; i < channelCount; i++) {
-	  double* input = inputs[i];
-	  double* output = outputs[i];
-
+    double* input = inputs[i];
+    double* output = outputs[i];
+	
 	  for (int s = 0; s < nFrames; ++s, ++input, ++output) {
-		  // Writing data to left and right channel buffers for delay effect
-		  if (i == 0) {
-			  if (ptrL > mBufferSize) {
-				  ptrL = 0;
-				  firstIteration = false;
-			  }
-			  mBufferL[ptrL] = *input;
-			  // Delay effect
-			  if (!firstIteration) {
-				  if (mBufferL[DelayPtrCalc(&ptrL)]) {
-					  *output = *input + (mWetLevel * mBufferL[DelayPtrCalc(&ptrL)]);
-				  } else {
-					  *output = *input;
-				  }
-			  } else {
-				  // Do not create delay effect if no data exists in the buffer
-				  *output = *input;
-			  }
-			  ++ptrL;
-		  } else {
-			  if (ptrR > mBufferSize) {
-				  ptrR = 0;
-				  firstIteration = false;
-			  }
-			  mBufferR[ptrR] = *input;
-			  if (!firstIteration) {
-				  if (mBufferR[DelayPtrCalc(&ptrR)]) {
-					  *output = *input + (mWetLevel * mBufferR[DelayPtrCalc(&ptrR)]);
-				  } else {
-					  *output = *input;
-				  }
-			  }
-			  else {
-				  *output = *input;
-			  }
-			  ptrR++;
-		  }
+		// Reset pointer index to 0 upon reaching end (Circular Buffer)
+	    if (mPtr >= mBufferSize) {
+		  mPtr = 0;
+		  firstIteration = false;
+		}
+		// Writing data to audio buffer for delay effect
+		mBuffer[mPtr] = *input;
+		// Delay effect
+		if (!firstIteration) {
+		  *output = *input + (mWetLevel * mBuffer[DelayPtrCalc(&mPtr)]);
+		} else {
+		  // Do not create delay effect if no data exists in the buffer
+		  *output = *input;
+		}
+		++mPtr;
 	  }
   }
 }
@@ -124,9 +102,9 @@ void Delay::CreatePresets() {
 }
 
 int Delay::DelayPtrCalc(int * ptr) {
-	if ((*ptr - 16384) < 0) {
-		return (32768 + (*ptr - 16384));
+	if ((*ptr - (mBufferSize / 2)) < 0) {
+		return (mBufferSize + (*ptr - (mBufferSize / 2)));
 	} else {
-		return (*ptr - 16384);
+		return (*ptr - (mBufferSize / 2));
 	}
 }

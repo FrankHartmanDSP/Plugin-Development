@@ -18,13 +18,11 @@ private:
   double mWetLevel;
   //int mSampleRate; // How to access if changed from 44.1kHz? 
   // -> Unnecessary, GetSampleRate() is inherited from IPlugBase
-  int ptrL;
-  int ptrR;
-  double mBufferL[32768]; // 2^15 is 32768
-  double mBufferR[32768]; // 2^15
+  int mPtr;
+  double mBuffer[32768]; // 2^15 is 32768
   int mBufferSize;
   void CreatePresets();
-  bool firstIteration; // Replace with logic
+  bool firstIteration;
 
 };
 
