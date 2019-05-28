@@ -102,9 +102,9 @@ void Delay::CreatePresets() {
 }
 
 int Delay::DelayPtrCalc(int * ptr) {
-	if ((*ptr - (mBufferSize / 2)) < 0) {
-		return (mBufferSize + (*ptr - (mBufferSize / 2)));
-	} else {
-		return (*ptr - (mBufferSize / 2));
-	}
+  if ((*ptr - (mBufferSize / 2)) < 0) {
+    return (mBufferSize + (*ptr - (mBufferSize / 2)));
+  } else {
+    return (*ptr - (mBufferSize / 2));
+  }
 }
